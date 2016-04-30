@@ -9,7 +9,7 @@ class Tab2(Frame):
         self.create_widgets()
 
     def create_widgets(self):
-    	self.canvas = Canvas(self, width=500, height=300)
+    	self.canvas = Canvas(self, width=1000, height=800)
     	self.fillCanvas()
     	self.canvas.pack()
     def fillCanvas(self):
