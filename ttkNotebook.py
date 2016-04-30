@@ -1,6 +1,6 @@
 
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 import sys
 from tab1 import Tab1
 from tab2 import Tab2

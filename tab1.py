@@ -1,5 +1,5 @@
-from Tkinter import *
-from ttk import *
+from tkinter import *
+from tkinter.ttk import *
 import sys
 
 class Tab1(Frame):
