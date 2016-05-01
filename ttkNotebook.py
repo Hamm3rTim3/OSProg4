@@ -9,6 +9,7 @@ from tab3 import Tab3
 class MyWindow:
     def __init__(self):
         root = Tk()
+        root.geometry("1000x400")
         root.title("GUI Prog 4")
         notebook = Notebook(root)
 
@@ -18,12 +19,12 @@ class MyWindow:
         notebook.add(tab1, text="TAB 1")
         notebook.add(tab2,text="TAB 2")
         notebook.add(tab3,text="TAB 3")
-        
+
         notebook.pack()
-        
-        root.mainloop()  
+
+        root.mainloop()
 
 def main():
     window = MyWindow()
-  
+
 main()

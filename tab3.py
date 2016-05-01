@@ -57,7 +57,7 @@ class Tab3(Frame):
         if self.numFramesValue.get().isnumeric() == False or self.numFramesValue.get() is None :
             messagebox.showerror(self.warningLabel, "You must enter a number.")
             return
-            
+
         elif int(self.numFramesValue.get()) > 10:
             messagebox.showwarning(self.warningLabel, "Please use no more than 10 frames.")
             return
