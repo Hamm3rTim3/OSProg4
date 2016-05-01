@@ -90,10 +90,10 @@ class Tab3(Frame):
     def radioCallback(self):
 
         #Generate random reference String
-        referenceString =[]
+        self.referenceString =[]
         topRange = int(self.numReferenceValue.get())
         for i in range( 0, topRange ):
-            referenceString.append(random.randrange(0, 9))
+            self.referenceString.append(random.randrange(0, 9))
 
         if self.radioValue.get() == 1:
             self.drawFIFO()
@@ -106,9 +106,24 @@ class Tab3(Frame):
         else:
             self.drawNRU()
 
-    def drawFIFO(self):
-        print("FIFO")
+    def drawFrame( self, frame, refVal, frameValues, color ):
 
+        numFrames = int(self.numFramesValue.get())
+        var = 60*(numFrames+1)
+        width = 60
+        canvas = Canvas( frame, width=60, height=var)
+        canvas.create_rectangle((2, width, width-2, var-2), outline=color)
+        canvas.create_text((width/2,width/2), text=refVal)
+        for i in range( numFrames ):
+            canvas.create_text((width/2,width/2+(i+1)), text=frameValues[i])
+            canvas.create_line((2, width+(i+1), width-2, width+(i+1)), fill=color)
+        canvas.pack(side=LEFT)
+
+
+    def drawFIFO(self):
+        self.inner=Frame(self)
+        self.inner.grid(columnspan=1000)
+        self.drawFrame( self.inner, self.referenceString[0], [1,2,3], "red" )
 
     def drawOptimal(self):
         print("Optimal")
