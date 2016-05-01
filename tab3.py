@@ -108,6 +108,8 @@ class Tab3(Frame):
 
     def drawFIFO(self):
         print("FIFO")
+
+
     def drawOptimal(self):
         print("Optimal")
     def drawLRU(self):
