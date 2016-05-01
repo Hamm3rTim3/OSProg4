@@ -5,7 +5,7 @@ import sys
 class Tab2(Frame):
     def __init__(self, master):
         Frame.__init__(self,master,width=500, height=300)
-        self.pack()
+#        self.pack()
         self.create_widgets()
 
     def create_widgets(self):

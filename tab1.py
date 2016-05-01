@@ -75,7 +75,7 @@ class Tab1(Frame):
 		self.timeQuantaEntry.pack(side=LEFT)
 		self.button = Button(self.inner, text = "Generate Processes", command = self.generateProcNoPriority)
 		self.button.pack(side=LEFT)
-		
+
 	def drawPriority(self):
 		print("Pushed the 2 Radio Button")
 	def drawSJF(self):
@@ -111,7 +111,7 @@ class Tab1(Frame):
 				self.processTime[currentProcess] = self.processTime[currentProcess] - 1
 				processText = "P" + str(currentProcess+1)
 				self.ganttChart.create_text((15+(i*self.unit), 15), text=processText)
-				
+
 	def checkProcessInput(self):
 		self.totalTime = 0
 		self.processTime = []
