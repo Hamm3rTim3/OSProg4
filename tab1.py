@@ -91,6 +91,23 @@ class Tab1(Frame):
 		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
 		self.ganttChart.create_rectangle((5, 5, 800, 40))
 	def radioCallback(self):
+		try:
+			try:
+				for elem in self.inner.winfo_children():
+					elem.destroy()
+			except(NameError, AttributeError):
+				pass
+			self.inner.destroy()
+		except (NameError, AttributeError):
+			pass
+		try:
+			try:
+				for elem in self.processWindow.winfo_children():
+					elem.destroy()
+			except(NameError, AttributeError):
+				pass
+		except(NameError, AttributeError):
+			pass
 		if self.radioValue.get() == 1:
 			self.drawRoundRobin()
 		elif self.radioValue.get() == 2:
@@ -136,6 +153,8 @@ class Tab1(Frame):
 	def simulateRoundRobin(self):
 		if self.checkProcessInput() is False:
 			return
+		self.ganttChart.delete("all")
+		self.ganttChart.create_rectangle((5, 5, 800, 40))
 		self.unit = 795/self.totalTime
 		self.timeQuanta = int(self.timeQuantaValue.get())
 		currentProcess = 0
@@ -167,6 +186,8 @@ class Tab1(Frame):
 			return
 		if self.checkPriorityInput() is False:
 			return
+		self.ganttChart.delete("all")
+		self.ganttChart.create_rectangle((5, 5, 800, 40))
 		self.unit = 795/self.totalTime
 		currentProcess = -1
 		totalProcesses = int(self.numProcessValue.get())
@@ -187,6 +208,8 @@ class Tab1(Frame):
 	def simulateSJF(self):
 		if self.checkProcessInput() is False:
 			return
+		self.ganttChart.delete("all")
+		self.ganttChart.create_rectangle((5, 5, 800, 40))
 		self.unit = 795/self.totalTime
 		currentProcess = -1
 		totalProcesses = int(self.numProcessValue.get())
@@ -209,18 +232,20 @@ class Tab1(Frame):
 		self.processTime = []
 		for i in range(int(self.numProcessValue.get())):
 			cpuBurst = self.processListValue[i].get()
-			self.processTime.append(int(cpuBurst))
 			if cpuBurst.isnumeric() == False or int(cpuBurst) < 1:
 				messagebox.showwarning(self.warningLabel, "Please enter a valid CPU burst time")
 				return False
 			else:
+				self.processTime.append(int(cpuBurst))
 				self.totalTime += int(cpuBurst)
 		return True
 	def checkPriorityInput(self):
 		self.priorityValue = []
 		for i in range(int(self.numProcessValue.get())):
 			priority = self.priorityListValue[i].get()
-			self.priorityValue.append(int(priority))
 			if priority.isnumeric() == False or int(priority) < 1:
 				messagebox.showwarning(self.warningLabel, "Please enter a valid Priority value")
 				return False
+			else:
+				self.priorityValue.append(int(priority))
+		return True
