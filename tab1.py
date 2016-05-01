@@ -14,18 +14,20 @@ class Tab1(Frame):
 		self.radioValue = IntVar()
 		self.roundRobinRadio = Radiobutton(self, text = "Round Robin", variable = self.radioValue, value = 1, command = self.radioCallback)
 		self.roundRobinRadio.grid(row=1, column=1)
-		self.roundRobinRadio = Radiobutton(self, text = "Priority", variable = self.radioValue, value = 2, command = self.radioCallback)
-		self.roundRobinRadio.grid(row=1, column=2)
-		self.roundRobinRadio = Radiobutton(self, text = "Shortest Job First", variable = self.radioValue, value = 3, command = self.radioCallback)
-		self.roundRobinRadio.grid(row=1, column=3)
+		self.priorityRadio = Radiobutton(self, text = "Priority", variable = self.radioValue, value = 2, command = self.radioCallback)
+		self.priorityRadio.grid(row=1, column=2)
+		self.sjfRadio = Radiobutton(self, text = "Shortest Job First", variable = self.radioValue, value = 3, command = self.radioCallback)
+		self.sjfRadio.grid(row=1, column=3)
 
 	def generateProcNoPriority(self):
 		self.warningLabel = "Danger, Danger!!!"
 		if self.numProcessValue.get().isnumeric() == False:
 			messagebox.showerror(self.warningLabel,self.numProcessValue.get() + " is not a number.")
 			return
-		if self.timeQuantaValue.get().isnumeric() == False:
-			messagebox.showerror(self.warningLabel, self.timeQuantaValue.get() + " is not a number.")
+		if self.radioValue.get() == 1:
+			if self.timeQuantaValue.get().isnumeric() == False:
+				messagebox.showerror(self.warningLabel, self.timeQuantaValue.get() + " is not a number.")
+				return
 		if int(self.numProcessValue.get()) > 10:
 			messagebox.showwarning(self.warningLabel, "Please use a smaller number of processes. Please use less than 10 processes.")
 			return
@@ -41,7 +43,10 @@ class Tab1(Frame):
 			self.processListValue.append(StringVar())
 			self.processList.append(Entry(self.processWindow, textvariable=self.processListValue[i]))
 			self.processList[i].grid(row=i, column=1)
-		self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
+		if self.radioValue.get() == 1:
+			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
+		else:
+			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
 		self.simulateButton.grid(row = int(self.numProcessValue.get()), columnspan=2)
 		self.ganttRow = int(self.numProcessValue.get())+1
 		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
