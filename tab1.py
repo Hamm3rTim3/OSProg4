@@ -129,7 +129,7 @@ class Tab1(Frame):
 		self.timeQuantaEntry.pack(side=LEFT)
 		self.button = Button(self.inner, text = "Generate Processes", command = self.generateProcNoPriority)
 		self.button.pack(side=LEFT)
-		
+
 	def drawPriority(self):
 		self.inner = Frame(self)
 		self.inner.grid(row=2, columnspan=100)
@@ -227,6 +227,7 @@ class Tab1(Frame):
 				xpos = 5 + (i+1)*self.unit
 				self.ganttChart.create_line(xpos, 5, xpos, 40)
 				currentProcess = -1
+
 	def checkProcessInput(self):
 		self.totalTime = 0
 		self.processTime = []
