@@ -6,6 +6,7 @@
 from tkinter import *
 from tkinter.ttk import *
 import sys
+import random
 
 class Tab3(Frame):
     def __init__(self, master):
@@ -15,15 +16,15 @@ class Tab3(Frame):
 
     def create_widgets(self):
         self.radioValue = IntVar()
-        self.FIFO = Radiobutton(self, text = "FIFO", variable = self.radioValue, value = 1, command = self.radioCallback)
+        self.FIFO = Radiobutton(self, text = "FIFO", variable = self.radioValue, value = 1 )#, command = self.radioCallback)
         self.FIFO.grid(row=1, column=1)
-        self.optimal = Radiobutton(self, text = "Optimal", variable = self.radioValue, value = 2, command = self.radioCallback)
+        self.optimal = Radiobutton(self, text = "Optimal", variable = self.radioValue, value = 2 )#, command = self.radioCallback)
         self.optimal.grid(row=1, column=2)
-        self.LRU = Radiobutton(self, text = "LRU", variable = self.radioValue, value = 3, command = self.radioCallback)
+        self.LRU = Radiobutton(self, text = "LRU", variable = self.radioValue, value = 3 )#, command = self.radioCallback)
         self.LRU.grid(row=1, column=3)
-        self.LFU = Radiobutton(self, text = "LFU", variable = self.radioValue, value = 4, command = self.radioCallback)
+        self.LFU = Radiobutton(self, text = "LFU", variable = self.radioValue, value = 4 )#, command = self.radioCallback)
         self.LFU.grid(row=1, column=4)
-        self.NRU = Radiobutton(self, text = "NRU", variable = self.radioValue, value = 5, command = self.radioCallback)
+        self.NRU = Radiobutton(self, text = "NRU", variable = self.radioValue, value = 5 )#, command = self.radioCallback)
         self.NRU.grid(row=1, column=5)
 
 
@@ -82,10 +83,18 @@ class Tab3(Frame):
         elif int(self.numReferenceValue.get()) > 10:
                 messagebox.showwarning(self.warningLabel, "Please keep string to less than 20.")
                 return
-
+        else:
+            self.radioCallback()
 
 
     def radioCallback(self):
+
+        #Generate random reference String
+        referenceString =[]
+        topRange = int(self.numReferenceValue.get())
+        for i in range( 0, topRange ):
+            referenceString.append(random.randrange(0, 9))
+
         if self.radioValue.get() == 1:
             self.drawFIFO()
         elif self.radioValue.get() == 2:
@@ -99,6 +108,8 @@ class Tab3(Frame):
 
     def drawFIFO(self):
         print("FIFO")
+
+
     def drawOptimal(self):
         print("Optimal")
     def drawLRU(self):
