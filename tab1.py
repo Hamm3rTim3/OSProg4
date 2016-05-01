@@ -43,9 +43,9 @@ class Tab1(Frame):
 			self.processList[i].grid(row=i, column=1)
 		self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
 		self.simulateButton.grid(row = int(self.numProcessValue.get()), columnspan=2)
-		ganttRow = int(self.numProcessValue.get())+1
+		self.ganttRow = int(self.numProcessValue.get())+1
 		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
-		self.ganttChart.grid(row = ganttRow, columnspan=100)
+		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
 		self.ganttChart.create_rectangle((5, 5, 800, 40))
 
 	def radioCallback(self):
@@ -85,17 +85,28 @@ class Tab1(Frame):
 		processLines = []
 		totalProcesses = int(self.numProcessValue.get())
 		for i in range(self.totalTime):
-			if (i % self.timeQuanta) == 0 or self.processTime[currentProcess] == 0:
+			print("Current Process: " + str(currentProcess) + " time: " + str(self.processTime[currentProcess]))
+			if ((i % self.timeQuanta) == 0  and i != 0) or self.processTime[currentProcess] == 0:
+				prevProcess = currentProcess
 				currentProcess = (currentProcess + 1) % totalProcesses
-			elif currentProcess == prevProcess:
-				self.ganttChart.remove(processLines[i-1])
-				processLines.append(self.ganttChart.create_line((5+(i*self.unit), 5, (5+(i*self.unit), 40))))
-				self.processTime[currentProcess] = int(self.processTime[currentProcess]) - 1
+			zeroProc = currentProcess
+			while self.processTime[currentProcess] == 0:
+				currentProcess = (currentProcess + 1) % totalProcesses
+				if currentProcess == zeroProc and self.processTime[currentProcess]:
+					break
+			xpos = 5 + (i+1)*self.unit
+			if currentProcess == prevProcess:
+				self.ganttChart.delete(processLines[i-1])
+				processLines.append(self.ganttChart.create_line(xpos, 5, xpos, 40))
+				self.processTime[currentProcess] = self.processTime[currentProcess] - 1
+				print("continuing process")
 			else:
-				processLines.append(self.ganttChart.create_line((5+(i*self.unit), 5, (5+(i*self.unit), 40))))
-				self.processTime[currentProcess] = int(self.processTime[currentProcess]) - 1
-				self.ganttChart.create_text((10+(i*self.unit), 10), text="P"+str(currentProcess+1))
-			sleep(1)
+				prevProcess = currentProcess
+				processLines.append(self.ganttChart.create_line(xpos, 5, xpos, 40))
+				self.processTime[currentProcess] = self.processTime[currentProcess] - 1
+				processText = "P" + str(currentProcess+1)
+				self.ganttChart.create_text((15+(i*self.unit), 15), text=processText)
+				
 	def checkProcessInput(self):
 		self.totalTime = 0
 		self.processTime = []
@@ -107,4 +118,6 @@ class Tab1(Frame):
 				return False
 			else:
 				self.totalTime += int(cpuBurst)
+				print(cpuBurst, int(cpuBurst))
+		print(self.processTime)
 		return True
