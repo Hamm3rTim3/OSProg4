@@ -167,16 +167,19 @@ class Tab1(Frame):
 		prevProcess = -1
 		processLines = []
 		totalProcesses = int(self.numProcessValue.get())
+		procTimeLeft = self.timeQuanta
 		for i in range(self.totalTime):
-			if ((i % self.timeQuanta) == 0  and i != 0) or self.processTime[currentProcess] == 0:
+			if procTimeLeft == 0 or self.processTime[currentProcess] == 0:
 				prevProcess = currentProcess
 				currentProcess = (currentProcess + 1) % totalProcesses
+				procTimeLeft = self.timeQuanta
 			zeroProc = currentProcess
 			while self.processTime[currentProcess] == 0:
 				currentProcess = (currentProcess + 1) % totalProcesses
 				if currentProcess == zeroProc and self.processTime[currentProcess]:
 					break
 			xpos = 5 + (i+1)*self.unit
+			procTimeLeft -= 1
 			if currentProcess == prevProcess:
 				self.ganttChart.delete(processLines[i-1])
 				processLines.append(self.ganttChart.create_line(xpos, 5, xpos, 40))
