@@ -1,4 +1,16 @@
+'''************************************************************************
+   Program: Simulation Project
+   Author: Adam Lawson & Evan Hammer
+   Class: CSC-456
+   Instructor: Dr. Jeff McGough
+   Date: 5/1/2016
+   Description: This GUI program demonstrates 3 main concepts: 1) Various process schedulers (Round Robin, Priority, Shortest Job First) 2) Simulation of the memory magagement unit, TLB, page tables and paging 3) Simulatino of page replacement algorithms (FIFO, Optimal, LRU, LFU, NRU). This program opens with 3 visible tabs for the user to choose from among the 3 simulations. After the user enters in the required information (which the program error checks) and clicks on the 'run' button, the program will display the desired information in a graphic along the bottom of the page.
 
+   Compilation instructions: This program was built using Python 3 and tkinter. To run type the following: python3 ttkNotebook.py.
+   
+   Usage: See above under Compilation instructions.
+
+ ************************************************************************'''
 from tkinter import *
 from tkinter.ttk import *
 import sys

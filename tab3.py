@@ -1,3 +1,8 @@
+'''************************************************************************
+   Class: tab3.py
+   Author: Adam Lawson & Evan Hammer
+   Description: This file is used in conjuction with ttkNotebook.py
+ ************************************************************************'''
 from tkinter import *
 from tkinter.ttk import *
 import sys

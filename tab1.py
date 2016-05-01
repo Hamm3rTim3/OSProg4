@@ -1,3 +1,9 @@
+'''************************************************************************
+   Class: tab1.py
+   Author: Adam Lawson & Evan Hammer
+   Description: This file is used in conjuction with ttkNotebook.py
+ ************************************************************************'''
+
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import messagebox
@@ -83,7 +89,7 @@ class Tab1(Frame):
 			self.priorityListValue.append(StringVar())
 			self.priorityList.append(Entry(self.processWindow, textvariable=self.priorityListValue[i]))
 			self.priorityList[i].grid(row=i+1, column=2)
-	
+
 		self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulatePriority)
 		self.simulateButton.grid(row = int(self.numProcessValue.get())+1, columnspan=2)
 		self.ganttRow = int(self.numProcessValue.get())+2
