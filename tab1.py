@@ -46,13 +46,50 @@ class Tab1(Frame):
 		if self.radioValue.get() == 1:
 			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
 		else:
-			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
+			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateSJF)
 		self.simulateButton.grid(row = int(self.numProcessValue.get()), columnspan=2)
 		self.ganttRow = int(self.numProcessValue.get())+1
 		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
 		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
 		self.ganttChart.create_rectangle((5, 5, 800, 40))
+	def generateProcPriority(self):
+		self.warningLabel = "Danger, Danger!!!"
+		if self.numProcessValue.get().isnumeric() == False:
+			messagebox.showerror(self.warningLabel,self.numProcessValue.get() + " is not a number.")
+			return
+		if int(self.numProcessValue.get()) > 10:
+			messagebox.showwarning(self.warningLabel, "Please use a smaller number of processes. Please use less than 10 processes.")
+			return
 
+		self.processWindow = Frame(self)
+		self.processWindow.grid(row=3, columnspan=100, rowspan=100)
+		self.processList = []
+		self.processListLabel = []
+		self.processListValue = []
+		self.priorityList = []
+		self.priorityListValue = []
+		label = Label(self.processWindow, text="Process")
+		label.grid(row=0, column=0)
+		label = Label(self.processWindow, text="CPU Burst")
+		label.grid(row=0, column=1)
+		label = Label(self.processWindow, text="Priority")
+		label.grid(row=0, column=2)
+		for i in range(int(self.numProcessValue.get())):
+			self.processListLabel.append(Label(self.processWindow, text="P"+str(i+1)))
+			self.processListLabel[i].grid(row=i+1, column=0)
+			self.processListValue.append(StringVar())
+			self.processList.append(Entry(self.processWindow, textvariable=self.processListValue[i]))
+			self.processList[i].grid(row=i+1, column=1)
+			self.priorityListValue.append(StringVar())
+			self.priorityList.append(Entry(self.processWindow, textvariable=self.priorityListValue[i]))
+			self.priorityList[i].grid(row=i+1, column=2)
+	
+		self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulatePriority)
+		self.simulateButton.grid(row = int(self.numProcessValue.get())+1, columnspan=2)
+		self.ganttRow = int(self.numProcessValue.get())+2
+		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
+		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
+		self.ganttChart.create_rectangle((5, 5, 800, 40))
 	def radioCallback(self):
 		if self.radioValue.get() == 1:
 			self.drawRoundRobin()
@@ -77,9 +114,25 @@ class Tab1(Frame):
 		self.button.pack(side=LEFT)
 		
 	def drawPriority(self):
-		print("Pushed the 2 Radio Button")
+		self.inner = Frame(self)
+		self.inner.grid(row=2, columnspan=100)
+		self.numProcessLabel = Label(self.inner, text="Number of Processes:")
+		self.numProcessLabel.pack(side=LEFT)
+		self.numProcessValue = StringVar()
+		self.numProcessEntry = Entry(self.inner, textvariable = self.numProcessValue)
+		self.numProcessEntry.pack(side=LEFT)
+		self.button = Button(self.inner, text="Generate Processes", command = self.generateProcPriority)
+		self.button.pack(side=LEFT)
 	def drawSJF(self):
-		print("Pushed the 3 Button!!")
+		self.inner = Frame(self)
+		self.inner.grid(row=2, columnspan=100)
+		self.numProcessLabel = Label(self.inner, text="Number of Processes:")
+		self.numProcessLabel.pack(side=LEFT)
+		self.numProcessValue = StringVar()
+		self.numProcessEntry = Entry(self.inner, textvariable = self.numProcessValue)
+		self.numProcessEntry.pack(side=LEFT)
+		self.button = Button(self.inner, text="Generate Processes", command = self.generateProcNoPriority)
+		self.button.pack(side=LEFT)
 	def simulateRoundRobin(self):
 		if self.checkProcessInput() is False:
 			return
@@ -90,7 +143,6 @@ class Tab1(Frame):
 		processLines = []
 		totalProcesses = int(self.numProcessValue.get())
 		for i in range(self.totalTime):
-			print("Current Process: " + str(currentProcess) + " time: " + str(self.processTime[currentProcess]))
 			if ((i % self.timeQuanta) == 0  and i != 0) or self.processTime[currentProcess] == 0:
 				prevProcess = currentProcess
 				currentProcess = (currentProcess + 1) % totalProcesses
@@ -104,14 +156,54 @@ class Tab1(Frame):
 				self.ganttChart.delete(processLines[i-1])
 				processLines.append(self.ganttChart.create_line(xpos, 5, xpos, 40))
 				self.processTime[currentProcess] = self.processTime[currentProcess] - 1
-				print("continuing process")
 			else:
 				prevProcess = currentProcess
 				processLines.append(self.ganttChart.create_line(xpos, 5, xpos, 40))
 				self.processTime[currentProcess] = self.processTime[currentProcess] - 1
 				processText = "P" + str(currentProcess+1)
 				self.ganttChart.create_text((15+(i*self.unit), 15), text=processText)
-				
+	def simulatePriority(self):
+		if self.checkProcessInput() is False:
+			return
+		if self.checkPriorityInput() is False:
+			return
+		self.unit = 795/self.totalTime
+		currentProcess = -1
+		totalProcesses = int(self.numProcessValue.get())
+		for i in range(self.totalTime):
+			minPiority = 1000000
+			if currentProcess < 0:
+				for j in range(totalProcesses):
+					if self.priorityValue[j] < minPiority and self.processTime[j] > 0:
+						minPiority = self.priorityValue[j]
+						currentProcess = j
+				processText = "P" + str(currentProcess+1)
+				self.ganttChart.create_text((15+(i*self.unit), 15), text=processText)
+			self.processTime[currentProcess] = self.processTime[currentProcess] - 1
+			if self.processTime[currentProcess] == 0:
+				xpos = 5 + (i+1)*self.unit
+				self.ganttChart.create_line(xpos, 5, xpos, 40)
+				currentProcess = -1
+	def simulateSJF(self):
+		if self.checkProcessInput() is False:
+			return
+		self.unit = 795/self.totalTime
+		currentProcess = -1
+		totalProcesses = int(self.numProcessValue.get())
+		for i in range(self.totalTime):
+			minCpuTime = 1000000
+			if currentProcess < 0:
+				for j in range(totalProcesses):
+					if self.processTime[j] > 0 and self.processTime[j] < minCpuTime:
+						minCpuTime = self.processTime[j]
+						currentProcess = j
+				processText = "P" + str(currentProcess+1)
+				self.ganttChart.create_text((15+(i*self.unit), 15), text=processText)
+			self.processTime[currentProcess] = self.processTime[currentProcess] - 1
+			if self.processTime[currentProcess] == 0:
+				xpos = 5 + (i+1)*self.unit
+				self.ganttChart.create_line(xpos, 5, xpos, 40)
+				currentProcess = -1
 	def checkProcessInput(self):
 		self.totalTime = 0
 		self.processTime = []
@@ -123,6 +215,12 @@ class Tab1(Frame):
 				return False
 			else:
 				self.totalTime += int(cpuBurst)
-				print(cpuBurst, int(cpuBurst))
-		print(self.processTime)
 		return True
+	def checkPriorityInput(self):
+		self.priorityValue = []
+		for i in range(int(self.numProcessValue.get())):
+			priority = self.priorityListValue[i].get()
+			self.priorityValue.append(int(priority))
+			if priority.isnumeric() == False or int(priority) < 1:
+				messagebox.showwarning(self.warningLabel, "Please enter a valid Priority value")
+				return False
