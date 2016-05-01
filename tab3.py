@@ -109,14 +109,14 @@ class Tab3(Frame):
     def drawFrame( self, frame, refVal, frameValues, color ):
 
         numFrames = int(self.numFramesValue.get())
-        var = 60*(numFrames+1)
-        width = 60
-        canvas = Canvas( frame, width=60, height=var)
-        canvas.create_rectangle((2, width, width-2, var-2), outline=color)
-        canvas.create_text((width/2,width/2), text=refVal)
+        width = 30
+        var = width*(numFrames+1)
+        canvas = Canvas( frame, width=width, height=var)
+        canvas.create_rectangle((4, width, width, var), outline=color)
+        canvas.create_text((width/2,width/2), text=refVal, fill=color)
         for i in range( numFrames ):
-            canvas.create_text((width/2,width/2+(i+1)), text=frameValues[i])
-            canvas.create_line((2, width+(i+1), width-2, width+(i+1)), fill=color)
+            canvas.create_text((width/2,width*(i+1)+width/2), text=frameValues[i], fill=color)
+            canvas.create_line((4, width*(i+1), width, width*(i+1)), fill=color)
         canvas.pack(side=LEFT)
 
 
@@ -124,6 +124,9 @@ class Tab3(Frame):
         self.inner=Frame(self)
         self.inner.grid(columnspan=1000)
         self.drawFrame( self.inner, self.referenceString[0], [1,2,3], "red" )
+        self.drawFrame( self.inner, self.referenceString[1], [1,2,3], "black" )
+        self.drawFrame( self.inner, self.referenceString[2], [1,2,3], "red" )
+        self.drawFrame( self.inner, self.referenceString[3], [1,2,3], "red" )
 
     def drawOptimal(self):
         print("Optimal")
