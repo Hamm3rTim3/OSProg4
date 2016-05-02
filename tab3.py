@@ -107,7 +107,6 @@ class Tab3(Frame):
             self.drawNRU()
 
     def drawFrame( self, frame, refVal, frameValues, color ):
-
         numFrames = int(self.numFramesValue.get())
         width = 30
         var = width*(numFrames+1)
@@ -118,6 +117,19 @@ class Tab3(Frame):
             canvas.create_text((width/2,width*(i+1)+width/2), text=frameValues[i][0], fill=color)
             canvas.create_line((4, width*(i+1), width, width*(i+1)), fill=color)
         canvas.pack(side=LEFT)
+
+    def drawOptimalFrame( self, frame, refVal, frameValues, color ):
+        numFrames = int(self.numFramesValue.get())
+        width = 30
+        var = width*(numFrames+1)
+        canvas = Canvas( frame, width=width, height=var)
+        canvas.create_rectangle((4, width, width, var), outline=color)
+        canvas.create_text((width/2,width/2), text=refVal, fill=color)
+        for i in range( numFrames ):
+            canvas.create_text((width/2,width*(i+1)+width/2), text=frameValues[i], fill=color)
+            canvas.create_line((4, width*(i+1), width, width*(i+1)), fill=color)
+        canvas.pack(side=LEFT)
+
     def simulateFIFO(self):
     	oldest = 0
     	pos = 0
@@ -136,13 +148,53 @@ class Tab3(Frame):
     			self.iterator += 1
     			self.afterId =self.inner.after(100, self.simulateFIFO)
     			return
-    			
+
     	self.frameValues[pos][0] = self.referenceString[self.iterator]
     	self.frameValues[pos][1] = 0
     	self.drawFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
     	self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
     	self.iterator += 1
     	self.afterId = self.inner.after(100, self.simulateFIFO)
+
+    def simulateOptimal(self):
+        pos = 0
+        maxDistance = 0
+
+        if self.iterator == int(self.numReferenceValue.get()):
+            return
+        for i in range(int(self.numFramesValue.get())):
+            if self.frameValues[i] == "":
+                pos = i
+                self.frameValues[pos] = self.referenceString[self.iterator]
+                self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
+                self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+                self.iterator += 1
+                self.afterId = self.inner.after(100, self.simulateOptimal)
+                return
+
+            if self.frameValues[i] == self.referenceString[self.iterator]:
+                self.drawOptimalFrame( self.inner, self.referenceString[self.iterator], self.frameValues, "black" )
+                self.iterator += 1
+                self.afterId =self.inner.after(100, self.simulateOptimal)
+                return
+
+        referenceSubstring = self.referenceString[self.iterator:]
+
+        for i in range(len(self.frameValues)):
+            try:
+                if maxDistance < referenceSubstring.index(self.frameValues[i]):
+                    maxDistance = referenceSubstring.index(self.frameValues[i])
+                    pos = i
+            except ValueError:
+                pos = i
+                break
+        self.frameValues[pos] = self.referenceString[self.iterator]
+        self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
+        self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+        self.iterator += 1
+        self.afterId = self.inner.after(100, self.simulateOptimal)
+        return
+
 
 
     def drawFIFO(self):
@@ -151,12 +203,18 @@ class Tab3(Frame):
         self.frameValues = []
         self.numPageFaultValue.set("0")
         for i in range(int(self.numFramesValue.get())):
-        	self.frameValues.append(["",0])
+        	self.frameValues.append("")
         self.iterator = 0
         self.simulateFIFO()
 
     def drawOptimal(self):
-        print("Optimal")
+        self.inner=Frame(self)
+        self.inner.grid(columnspan=1000)
+        self.frameValues = [""]*int(self.numFramesValue.get())
+        self.numPageFaultValue.set("0")
+        self.iterator = 0
+        self.simulateOptimal()
+
     def drawLRU(self):
         print("LRU")
     def drawLFU(self):
