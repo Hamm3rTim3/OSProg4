@@ -124,9 +124,9 @@ class Tab3(Frame):
     	if self.iterator == int(self.numReferenceValue.get()):
     		return
     	for i in range(int(self.numFramesValue.get())):
-    		if self.frameValues[i][1] == "":
+    		if self.frameValues[i][0] == "":
     			pos = i
-    			continue
+    			break
     		self.frameValues[i][1] += 1
     		if oldest < self.frameValues[i][1]:
     			oldest = self.frameValues[i][1]
