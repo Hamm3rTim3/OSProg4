@@ -195,7 +195,45 @@ class Tab3(Frame):
         self.afterId = self.inner.after(100, self.simulateOptimal)
         return
 
+    def simulateLRU(self):
+        pos = 0
 
+        if self.iterator == int(self.numReferenceValue.get()):
+            return
+        if self.referenceString[self.iterator] in self.frameValues:
+            index = self.stack.index(self.referenceString[self.iterator])
+            top = self.stack.pop(index)
+            self.stack.append(top)
+            self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "black")
+            self.iterator += 1
+            self.afterId = self.inner.after(100, self.simulateLRU)
+            return
+        #If frames are empty, fill them.
+        if "" in self.frameValues:
+            self.stack.append(self.referenceString[self.iterator])
+            pos = self.frameValues.index("")
+            self.frameValues[pos] = self.referenceString[self.iterator]
+            self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
+            self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+            self.iterator += 1
+            self.afterId = self.inner.after(100, self.simulateLRU)
+            return
+
+        #Else get LRU and draw frame red.
+        else:
+            for i in self.stack:
+                if i in self.frameValues:
+                    pos = self.frameValues.index(i)
+                    self.frameValues[pos] = self.referenceString[self.iterator]
+                    if self.referenceString[self.iterator] in self.stack:
+                        self.stack.remove(self.referenceString[self.iterator])
+                    self.stack.append(self.referenceString[self.iterator])
+                    break
+            self.drawOptimalFrame( self.inner, self.referenceString[self.iterator], self.frameValues, "red" )
+            self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+            self.iterator += 1
+            self.afterId =self.inner.after(100, self.simulateLRU)
+            return
 
     def drawFIFO(self):
         self.inner=Frame(self)
@@ -216,7 +254,14 @@ class Tab3(Frame):
         self.simulateOptimal()
 
     def drawLRU(self):
-        print("LRU")
+        self.inner=Frame(self)
+        self.inner.grid(columnspan=1000)
+        self.frameValues = [""]*int(self.numFramesValue.get())
+        self.numPageFaultValue.set("0")
+        self.iterator = 0
+        self.stack = []
+        self.simulateLRU()
+
     def drawLFU(self):
         print("LFU")
     def drawNRU(self):
