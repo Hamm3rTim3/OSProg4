@@ -80,7 +80,7 @@ class Tab3(Frame):
             messagebox.showerror(self.warningLabel, "You must enter a number..")
             return
 
-        elif int(self.numReferenceValue.get()) > 10:
+        elif int(self.numReferenceValue.get()) > 20:
                 messagebox.showwarning(self.warningLabel, "Please keep string to less than 20.")
                 return
         else:
@@ -92,7 +92,7 @@ class Tab3(Frame):
         #Generate random reference String
         self.referenceString =[]
         topRange = int(self.numReferenceValue.get())
-        for i in range( 0, topRange ):
+        for i in range( topRange ):
             self.referenceString.append(random.randrange(0, 9))
 
         if self.radioValue.get() == 1:
@@ -115,18 +115,48 @@ class Tab3(Frame):
         canvas.create_rectangle((4, width, width, var), outline=color)
         canvas.create_text((width/2,width/2), text=refVal, fill=color)
         for i in range( numFrames ):
-            canvas.create_text((width/2,width*(i+1)+width/2), text=frameValues[i], fill=color)
+            canvas.create_text((width/2,width*(i+1)+width/2), text=frameValues[i][0], fill=color)
             canvas.create_line((4, width*(i+1), width, width*(i+1)), fill=color)
         canvas.pack(side=LEFT)
+    def simulateFIFO(self):
+    	oldest = 0
+    	pos = 0
+    	if self.iterator == int(self.numReferenceValue.get()):
+    		return
+    	print(self.frameValues)
+    	for i in range(int(self.numFramesValue.get())):
+    		print(i, self.iterator)
+    		if self.frameValues[i][1] == "":
+    			pos = i
+    			continue
+    		self.frameValues[i][1] += 1
+    		if oldest < self.frameValues[i][1]:
+    			oldest = self.frameValues[i][1]
+    			pos = i
+    		if self.frameValues[i][0] == self.referenceString[self.iterator]:
+    			self.drawFrame( self.inner, self.referenceString[self.iterator], self.frameValues, "black" )
+    			self.iterator += 1
+    			self.afterId =self.inner.after(100, self.simulateFIFO)
+    			return
+    			#call next simulation
+    	#print(self.iterator)
+    	self.frameValues[pos][0] = self.referenceString[self.iterator]
+    	self.frameValues[pos][1] = 0
+    	self.drawFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
+    	self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+    	self.iterator += 1
+    	self.afterId = self.inner.after(100, self.simulateFIFO)
 
 
     def drawFIFO(self):
         self.inner=Frame(self)
         self.inner.grid(columnspan=1000)
-        self.drawFrame( self.inner, self.referenceString[0], [1,2,3], "red" )
-        self.drawFrame( self.inner, self.referenceString[1], [1,2,3], "black" )
-        self.drawFrame( self.inner, self.referenceString[2], [1,2,3], "red" )
-        self.drawFrame( self.inner, self.referenceString[3], [1,2,3], "red" )
+        self.frameValues = []
+        self.numPageFaultValue.set("0")
+        for i in range(int(self.numFramesValue.get())):
+        	self.frameValues.append(["",0])
+        self.iterator = 0
+        self.simulateFIFO()
 
     def drawOptimal(self):
         print("Optimal")
