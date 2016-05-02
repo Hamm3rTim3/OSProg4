@@ -123,9 +123,7 @@ class Tab3(Frame):
     	pos = 0
     	if self.iterator == int(self.numReferenceValue.get()):
     		return
-    	print(self.frameValues)
     	for i in range(int(self.numFramesValue.get())):
-    		print(i, self.iterator)
     		if self.frameValues[i][1] == "":
     			pos = i
     			continue
@@ -138,8 +136,7 @@ class Tab3(Frame):
     			self.iterator += 1
     			self.afterId =self.inner.after(100, self.simulateFIFO)
     			return
-    			#call next simulation
-    	#print(self.iterator)
+    			
     	self.frameValues[pos][0] = self.referenceString[self.iterator]
     	self.frameValues[pos][1] = 0
     	self.drawFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
