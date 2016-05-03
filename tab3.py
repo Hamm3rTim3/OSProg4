@@ -93,7 +93,7 @@ class Tab3(Frame):
         self.referenceString =[]
         topRange = int(self.numReferenceValue.get())
         for i in range( topRange ):
-            self.referenceString.append(random.randrange(0, 9))
+            self.referenceString.append(random.randrange(0, int(self.numPagesValue.get())))
 
         if self.radioValue.get() == 1:
             self.drawFIFO()
@@ -195,6 +195,44 @@ class Tab3(Frame):
         self.afterId = self.inner.after(100, self.simulateOptimal)
         return
 
+    def simulateLFU(self):
+        pos = 0
+        minCount = 1000
+
+        if self.iterator == int(self.numReferenceValue.get()):
+            return
+
+        self.freqCount[self.referenceString[self.iterator]] += 1
+        if self.referenceString[self.iterator] in self.frameValues:
+            self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "black")
+            self.iterator += 1
+            self.afterId = self.inner.after(100, self.simulateLFU)
+            return
+
+        #If frames are empty, fill them.
+        if "" in self.frameValues:
+            pos = self.frameValues.index("")
+            self.frameValues[pos] = self.referenceString[self.iterator]
+            self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
+            self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+            self.iterator += 1
+            self.afterId = self.inner.after(100, self.simulateLFU)
+            return
+
+        else:
+            for i in self.frameValues:
+                if minCount > self.freqCount[i]:
+                    pos = self.frameValues.index(i)
+                    minCount = self.freqCount[i]
+
+            self.frameValues[pos] = self.referenceString[self.iterator]
+            self.drawOptimalFrame(self.inner, self.referenceString[self.iterator], self.frameValues, "red")
+            self.numPageFaultValue.set(int(self.numPageFaultValue.get())+1)
+            self.iterator += 1
+            self.afterId = self.inner.after(100, self.simulateLFU)
+            return
+
+
     def simulateLRU(self):
         pos = 0
 
@@ -263,6 +301,13 @@ class Tab3(Frame):
         self.simulateLRU()
 
     def drawLFU(self):
-        print("LFU")
+        self.inner=Frame(self)
+        self.inner.grid(columnspan=1000)
+        self.frameValues = [""]*int(self.numFramesValue.get())
+        self.numPageFaultValue.set("0")
+        self.iterator = 0
+        self.freqCount = [0]*int(self.numPagesValue.get())
+        self.simulateLFU()
+
     def drawNRU(self):
         print("NRU")
