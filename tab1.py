@@ -9,6 +9,7 @@ from tkinter.ttk import *
 from tkinter import messagebox
 from time import sleep
 import sys
+import random
 
 class Tab1(Frame):
 	def __init__(self, master):
@@ -43,18 +44,23 @@ class Tab1(Frame):
 		self.processList = []
 		self.processListLabel = []
 		self.processListValue = []
+		label = Label(self.processWindow, text="Process")
+		label.grid(row=0, column=0)
+		label = Label(self.processWindow, text="CPU Burst")
+		label.grid(row=0, column=1)
 		for i in range(int(self.numProcessValue.get())):
 			self.processListLabel.append(Label(self.processWindow, text="P"+str(i+1)))
-			self.processListLabel[i].grid(row=i, column=0)
+			self.processListLabel[i].grid(row=i+1, column=0)
 			self.processListValue.append(StringVar())
 			self.processList.append(Entry(self.processWindow, textvariable=self.processListValue[i]))
-			self.processList[i].grid(row=i, column=1)
+			self.processListValue[i].set(str(self.randCPUBurst(10)))
+			self.processList[i].grid(row=i+1, column=1)
 		if self.radioValue.get() == 1:
 			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateRoundRobin)
 		else:
 			self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulateSJF)
-		self.simulateButton.grid(row = int(self.numProcessValue.get()), columnspan=2)
-		self.ganttRow = int(self.numProcessValue.get())+1
+		self.simulateButton.grid(row = int(self.numProcessValue.get())+1, columnspan=2)
+		self.ganttRow = int(self.numProcessValue.get())+2
 		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
 		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
 		self.ganttChart.create_rectangle((5, 5, 800, 40))
@@ -85,9 +91,11 @@ class Tab1(Frame):
 			self.processListLabel[i].grid(row=i+1, column=0)
 			self.processListValue.append(StringVar())
 			self.processList.append(Entry(self.processWindow, textvariable=self.processListValue[i]))
+			self.processListValue[i].set(str(self.randCPUBurst(10)))
 			self.processList[i].grid(row=i+1, column=1)
 			self.priorityListValue.append(StringVar())
 			self.priorityList.append(Entry(self.processWindow, textvariable=self.priorityListValue[i]))
+			self.priorityListValue[i].set(str(self.randCPUBurst(10)))
 			self.priorityList[i].grid(row=i+1, column=2)
 
 		self.simulateButton = Button(self.processWindow, text="Simulate", command=self.simulatePriority)
@@ -259,3 +267,5 @@ class Tab1(Frame):
 			else:
 				self.priorityValue.append(int(priority))
 		return True
+	def randCPUBurst(self, maximum):
+		return random.randrange(1,maximum)

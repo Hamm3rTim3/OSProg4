@@ -65,8 +65,17 @@ class Tab2(Frame):
         else:
             self.simulateTLB()
     def simulateTLB(self):
-        self.TLBWaitTime = 1000
-        self.MemWaitTime = 2000
+        try:
+            try:
+                for elem in self.inner.winfo_children():
+                    elem.destroy()
+            except(NameError, AttributeError):
+                pass
+            self.inner.destroy()
+        except (NameError, AttributeError):
+            pass
+        self.TLBWaitTime = 100
+        self.MemWaitTime = 500
         self.inner = Frame(self)
         self.inner.grid(columnspan = 10)
         self.label = Label(self.inner, text="Effective Access Time: ")
@@ -75,6 +84,12 @@ class Tab2(Frame):
         self.EATLabel.grid(row=1, column=1)
         self.stopButton = Button(self.inner, text="Stop Simulation", command=self.stopSimulation)
         self.stopButton.grid(row=1, column=2)
+        self.label = Label(self.inner, text="Page Number:")
+        self.label.grid(row=1, column=3)
+        self.PageNumberLabel = Label(self.inner, text="Run")
+        self.PageNumberLabel.grid(row=1, column=4)
+        self.TLBHitLabel = Label(self.inner, text="TLB Hits:")
+        self.TLBHitLabel.grid(row=1, column=5)
         self.TLBLabel = Label(self.inner, text="TLB")
         self.TLBLabel.grid(row=2, column=0, columnspan=2)
         self.pagesLabel = Label(self.inner, text = "Page Table")
@@ -96,23 +111,25 @@ class Tab2(Frame):
         self.frameBox.grid(row=3,column=5, sticky=N)
         self.initTLB(int(self.numTLBValue.get()))
         self.numPages = len(self.pages)
+        self.EATLabel.config(text="0")
+        self.TLBHit = 0
+        self.TotalAccess = 0
         self.simulateMemAccess()
     def initTLB(self, tlbSize):
         self.TLBpages = ["~"]*tlbSize
         self.TLBframes= ["~"]*tlbSize
         self.TLBage = [0]*tlbSize
-        print(self.TLBage)
         for i in range(tlbSize):
             self.TLBPageBox.insert(i, self.TLBpages[i])
             self.TLBFrameBox.insert(i, self.TLBframes[i])
     def simulateMemAccess(self):
         self.inTLB = False
         self.pageNumber = random.randrange(0,self.numPages)
+        self.PageNumberLabel.config(text=str(self.pageNumber))
         self.afterId = self.inner.after(100, self.findInTLB)
     def findInTLB(self):
         self.TLBage = [x+1 for x in self.TLBage]
-        #if self.pageNumber in self.TLBpages:
-        print(self.TLBage, self.TLBframes, self.TLBpages)
+        self.TotalAccess += 1
         try:
             self.TLBindex = self.TLBpages.index(self.pageNumber)
             #change the background of the item to green for found
@@ -120,11 +137,14 @@ class Tab2(Frame):
             self.TLBFrameBox.itemconfig(self.TLBindex, bg="green")
             self.frame = self.TLBframes[self.TLBindex]
             self.inTLB = True
+            self.TLBHit +=1
+            self.TLBHitLabel.config(text = "TLB Hits: " + str(self.TLBHit)+"/"+str(self.TotalAccess))
             self.afterId = self.inner.after(self.TLBWaitTime, self.findInMemory)
         except(ValueError):
             for i in range(len(self.TLBframes)):
                 self.TLBFrameBox.itemconfig(i,bg="red")
-                self.TLBPageBox.itemconfig(i,bg="red")            
+                self.TLBPageBox.itemconfig(i,bg="red") 
+            self.TLBHitLabel.config(text = "TLB Hits: " + str(self.TLBHit)+"/"+str(self.TotalAccess))           
             self.afterId = self.inner.after(self.MemWaitTime, self.findInPageTable)
 
 
@@ -153,6 +173,9 @@ class Tab2(Frame):
         self.afterId = self.inner.after(self.MemWaitTime, self.findInMemory)
 
     def clearMemAccess(self):
+        hitPercent = self.TLBHit/self.TotalAccess
+        EAT = 120*hitPercent + 220 * (1-hitPercent)
+        self.EATLabel.config(text = ("%.2f"%EAT)+"ms")
         if not self.inTLB:
             for i in range(len(self.TLBframes)):
                 self.TLBFrameBox.itemconfig(i,bg="white")
@@ -168,7 +191,6 @@ class Tab2(Frame):
         try:
             self.inner.after_cancel(self.afterId)
         except(NameError, AttributeError):
-            print("Uh, Oh!!")
             pass
     def randomFrameNumber(self):
         frameList = ["Used"]*int(self.numFramesValue.get())
