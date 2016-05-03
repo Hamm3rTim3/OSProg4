@@ -65,6 +65,8 @@ class Tab2(Frame):
         else:
             self.simulateTLB()
     def simulateTLB(self):
+        self.TLBWaitTime = 1000
+        self.MemWaitTime = 2000
         self.inner = Frame(self)
         self.inner.grid(columnspan = 10)
         self.label = Label(self.inner, text="Effective Access Time: ")
@@ -79,30 +81,89 @@ class Tab2(Frame):
         self.pagesLabel.grid(row=2, column=3)
         self.frameLabel = Label(self.inner, text="Frames")
         self.frameLabel.grid(row=2, column=5)
-        self.TLBPageBox = Listbox(self.inner)
-        self.TLBPageBox.grid(row=3,column=0, rowspan=int(self.numTLBValue.get()), sticky=(N+E))
-        self.TLBFrameBox = Listbox(self.inner)
-        self.TLBFrameBox.grid(row=3,column=1, rowspan=int(self.numTLBValue.get()), sticky=(N+W))
+        self.TLBPageBox = Listbox(self.inner, height=int(self.numTLBValue.get()))
+        self.TLBPageBox.grid(row=3,column=0, sticky=(N+E))
+        self.TLBFrameBox = Listbox(self.inner, height=int(self.numTLBValue.get()))
+        self.TLBFrameBox.grid(row=3,column=1, sticky=(N+W))
         self.frames, self.pages = self.randomFrameNumber()
-        self.pagesBox = Listbox(self.inner)
+        self.pagesBox = Listbox(self.inner, height=len(self.pages))
         for i in range(len(self.pages)):
             self.pagesBox.insert(i, self.pages[i])
-        self.pagesBox.grid(row=3, column=3, rowspan=len(self.pages), sticky=N)
-        self.frameBox = Listbox(self.inner)
+        self.pagesBox.grid(row=3, column=3, sticky=N)
+        self.frameBox = Listbox(self.inner, height=len(self.frames))
         for i in range(len(self.frames)):
             self.frameBox.insert(i, self.frames[i])
-        self.frameBox.grid(row=3,column=5, rowspan=len(self.frames), sticky=N)
+        self.frameBox.grid(row=3,column=5, sticky=N)
         self.initTLB(int(self.numTLBValue.get()))
-        self.simulateMemAccess(len(self.pages))
+        self.numPages = len(self.pages)
+        self.simulateMemAccess()
     def initTLB(self, tlbSize):
-        self.TLB = [["~","~"]]*tlbSize
-        print(self.TLB)
-        for i in range(len(self.TLB)):
-            self.TLBPageBox.insert(i, self.TLB[i][0])
-            self.TLBFrameBox.insert(i, self.TLB[i][1])
-    def simulateMemAccess(self, numPages):
-        memAccess = random.randrange(0,numPages)
+        self.TLBpages = ["~"]*tlbSize
+        self.TLBframes= ["~"]*tlbSize
+        self.TLBage = [0]*tlbSize
+        print(self.TLBage)
+        for i in range(tlbSize):
+            self.TLBPageBox.insert(i, self.TLBpages[i])
+            self.TLBFrameBox.insert(i, self.TLBframes[i])
+    def simulateMemAccess(self):
+        self.inTLB = False
+        self.pageNumber = random.randrange(0,self.numPages)
+        self.afterId = self.inner.after(100, self.findInTLB)
+    def findInTLB(self):
+        self.TLBage = [x+1 for x in self.TLBage]
+        #if self.pageNumber in self.TLBpages:
+        print(self.TLBage, self.TLBframes, self.TLBpages)
+        try:
+            self.TLBindex = self.TLBpages.index(self.pageNumber)
+            #change the background of the item to green for found
+            self.TLBPageBox.itemconfig(self.TLBindex, bg="green")
+            self.TLBFrameBox.itemconfig(self.TLBindex, bg="green")
+            self.frame = self.TLBframes[self.TLBindex]
+            self.inTLB = True
+            self.afterId = self.inner.after(self.TLBWaitTime, self.findInMemory)
+        except(ValueError):
+            for i in range(len(self.TLBframes)):
+                self.TLBFrameBox.itemconfig(i,bg="red")
+                self.TLBPageBox.itemconfig(i,bg="red")            
+            self.afterId = self.inner.after(self.MemWaitTime, self.findInPageTable)
 
+
+    def findInMemory(self):
+        #color item green
+        self.frameBox.itemconfig( self.frame, bg="green")
+        self.afterId =  self.inner.after(self.MemWaitTime, self.clearMemAccess)
+    def findInPageTable(self):
+        #color item green
+        self.pagesBox.itemconfig(self.pageNumber, bg="green")
+        self.frame = self.pages[self.pageNumber]
+        if not self.inTLB:
+            pos = 0
+            oldest = 0
+            for i in self.TLBage:
+                if i > oldest:
+                    oldest = i
+                    pos = self.TLBage.index(i)
+            self.TLBage[pos] = 0
+            self.TLBpages[pos] = self.pageNumber
+            self.TLBframes[pos] = self.pages[self.pageNumber]
+            self.TLBPageBox.delete(pos)
+            self.TLBPageBox.insert(pos, self.pageNumber)
+            self.TLBFrameBox.delete(pos)
+            self.TLBFrameBox.insert(pos, self.pages[self.pageNumber])
+        self.afterId = self.inner.after(self.MemWaitTime, self.findInMemory)
+
+    def clearMemAccess(self):
+        if not self.inTLB:
+            for i in range(len(self.TLBframes)):
+                self.TLBFrameBox.itemconfig(i,bg="white")
+                self.TLBPageBox.itemconfig(i,bg="white")  
+            self.pagesBox.itemconfig(self.pageNumber, bg="white")
+            self.frameBox.itemconfig(self.frame, bg="white")
+        else:
+            self.TLBPageBox.itemconfig(self.TLBindex,bg="white")
+            self.TLBFrameBox.itemconfig(self.TLBindex, bg="white")
+            self.frameBox.itemconfig(self.frame, bg="white")
+        self.afterId = self.inner.after(self.TLBWaitTime, self.simulateMemAccess)
     def stopSimulation(self):
         try:
             self.inner.after_cancel(self.afterId)
@@ -116,7 +177,7 @@ class Tab2(Frame):
             rand = random.randrange(0,len(frameList))
             while(frameList[rand] != "Used"):
                 rand = random.randrange(0,len(frameList))
-            frameList[rand] = i
+            frameList[rand] = "Page " + str(i)
             pages.append(rand)
         return frameList, pages
 
