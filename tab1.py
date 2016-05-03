@@ -1,7 +1,8 @@
 '''************************************************************************
    Class: tab1.py
    Author: Adam Lawson & Evan Hammer
-   Description: This file is used in conjuction with ttkNotebook.py
+   Description: This file is used in conjuction with ttkNotebook.py. It create all of the simulations relating to process scheduling. The following
+   scheduling algorithms are simulated: Round Robin, SJF and Priority.
  ************************************************************************'''
 
 from tkinter import *
@@ -11,12 +12,14 @@ from time import sleep
 import sys
 import random
 
+#Put into a frame.
 class Tab1(Frame):
 	def __init__(self, master):
 		Frame.__init__(self,master,width = 1000, height=800)
 		self.create_widgets()
 		self.grid()
 
+	#Initial radio button options for selecting algorithm.
 	def create_widgets(self):
 		self.radioValue = IntVar()
 		self.roundRobinRadio = Radiobutton(self, text = "Round Robin", variable = self.radioValue, value = 1, command = self.radioCallback)
@@ -26,6 +29,7 @@ class Tab1(Frame):
 		self.sjfRadio = Radiobutton(self, text = "Shortest Job First", variable = self.radioValue, value = 3, command = self.radioCallback)
 		self.sjfRadio.grid(row=1, column=3)
 
+	#Checking the input into the textboxes for valid data.
 	def generateProcNoPriority(self):
 		self.warningLabel = "Danger, Danger!!!"
 		if self.numProcessValue.get().isnumeric() == False:
@@ -39,6 +43,7 @@ class Tab1(Frame):
 			messagebox.showwarning(self.warningLabel, "Please use a smaller number of processes. Please use less than 10 processes.")
 			return
 
+		#Creating the labels and final buttons for the tab.
 		self.processWindow = Frame(self)
 		self.processWindow.grid(row=3, columnspan=100, rowspan=100)
 		self.processList = []
@@ -64,6 +69,8 @@ class Tab1(Frame):
 		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
 		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
 		self.ganttChart.create_rectangle((5, 5, 800, 40))
+
+	#Once the user selects the algorithm, these final checks/labels are presented.
 	def generateProcPriority(self):
 		self.warningLabel = "Danger, Danger!!!"
 		if self.numProcessValue.get().isnumeric() == False:
@@ -86,6 +93,7 @@ class Tab1(Frame):
 		label.grid(row=0, column=1)
 		label = Label(self.processWindow, text="Priority")
 		label.grid(row=0, column=2)
+
 		for i in range(int(self.numProcessValue.get())):
 			self.processListLabel.append(Label(self.processWindow, text="P"+str(i+1)))
 			self.processListLabel[i].grid(row=i+1, column=0)
@@ -104,6 +112,9 @@ class Tab1(Frame):
 		self.ganttChart = Canvas(self.processWindow, width=800,height=40)
 		self.ganttChart.grid(row = self.ganttRow, columnspan=100)
 		self.ganttChart.create_rectangle((5, 5, 800, 40))
+
+	#This method redraws the screen by removing the parent and child so that
+	#the user can select another algorithm or redo the same.
 	def radioCallback(self):
 		try:
 			try:
@@ -128,6 +139,8 @@ class Tab1(Frame):
 			self.drawPriority()
 		else:
 			self.drawSJF()
+
+	#Round Robin drawing method.
 	def drawRoundRobin(self):
 		self.inner = Frame(self)
 		self.inner.grid(row=2, columnspan=100)
@@ -144,6 +157,7 @@ class Tab1(Frame):
 		self.button = Button(self.inner, text = "Generate Processes", command = self.generateProcNoPriority)
 		self.button.pack(side=LEFT)
 
+	#Priority drawing method
 	def drawPriority(self):
 		self.inner = Frame(self)
 		self.inner.grid(row=2, columnspan=100)
@@ -154,6 +168,8 @@ class Tab1(Frame):
 		self.numProcessEntry.pack(side=LEFT)
 		self.button = Button(self.inner, text="Generate Processes", command = self.generateProcPriority)
 		self.button.pack(side=LEFT)
+
+	#Shortest Job First drawing method.
 	def drawSJF(self):
 		self.inner = Frame(self)
 		self.inner.grid(row=2, columnspan=100)
@@ -164,6 +180,8 @@ class Tab1(Frame):
 		self.numProcessEntry.pack(side=LEFT)
 		self.button = Button(self.inner, text="Generate Processes", command = self.generateProcNoPriority)
 		self.button.pack(side=LEFT)
+
+	#The actual Round Robin simulation algorithm.
 	def simulateRoundRobin(self):
 		if self.checkProcessInput() is False:
 			return
@@ -176,6 +194,7 @@ class Tab1(Frame):
 		processLines = []
 		totalProcesses = int(self.numProcessValue.get())
 		procTimeLeft = self.timeQuanta
+
 		for i in range(self.totalTime):
 			if procTimeLeft == 0 or self.processTime[currentProcess] == 0:
 				prevProcess = currentProcess
@@ -188,6 +207,7 @@ class Tab1(Frame):
 					break
 			xpos = 5 + (i+1)*self.unit
 			procTimeLeft -= 1
+
 			if currentProcess == prevProcess:
 				self.ganttChart.delete(processLines[i-1])
 				processLines.append(self.ganttChart.create_line(xpos, 5, xpos, 40))
@@ -198,6 +218,8 @@ class Tab1(Frame):
 				self.processTime[currentProcess] = self.processTime[currentProcess] - 1
 				processText = "P" + str(currentProcess+1)
 				self.ganttChart.create_text((15+(i*self.unit), 15), text=processText)
+
+	#The actual Priority algorithm simulation.
 	def simulatePriority(self):
 		if self.checkProcessInput() is False:
 			return
@@ -208,6 +230,7 @@ class Tab1(Frame):
 		self.unit = 795/self.totalTime
 		currentProcess = -1
 		totalProcesses = int(self.numProcessValue.get())
+
 		for i in range(self.totalTime):
 			minPiority = 1000000
 			if currentProcess < 0:
@@ -222,6 +245,8 @@ class Tab1(Frame):
 				xpos = 5 + (i+1)*self.unit
 				self.ganttChart.create_line(xpos, 5, xpos, 40)
 				currentProcess = -1
+
+	#Actual SJF algorithm simulation
 	def simulateSJF(self):
 		if self.checkProcessInput() is False:
 			return
@@ -230,6 +255,7 @@ class Tab1(Frame):
 		self.unit = 795/self.totalTime
 		currentProcess = -1
 		totalProcesses = int(self.numProcessValue.get())
+
 		for i in range(self.totalTime):
 			minCpuTime = 1000000
 			if currentProcess < 0:
@@ -245,6 +271,7 @@ class Tab1(Frame):
 				self.ganttChart.create_line(xpos, 5, xpos, 40)
 				currentProcess = -1
 
+	#This method is validating the cpu burst time entered by the user.
 	def checkProcessInput(self):
 		self.totalTime = 0
 		self.processTime = []
@@ -257,6 +284,8 @@ class Tab1(Frame):
 				self.processTime.append(int(cpuBurst))
 				self.totalTime += int(cpuBurst)
 		return True
+
+	#Method to check the validity of user-entered priority numbers.
 	def checkPriorityInput(self):
 		self.priorityValue = []
 		for i in range(int(self.numProcessValue.get())):
@@ -267,5 +296,7 @@ class Tab1(Frame):
 			else:
 				self.priorityValue.append(int(priority))
 		return True
+
+	#Creating random cpu burst times is the user doesn't want to.
 	def randCPUBurst(self, maximum):
 		return random.randrange(1,maximum)
